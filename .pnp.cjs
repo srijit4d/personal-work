@@ -11,7 +11,7 @@ const RAW_RUNTIME_STATE =
   ],\
   "dependencyTreeRoots": [\
     {\
-      "name": "personal work",\
+      "name": "personal-work",\
       "reference": "workspace:."\
     }\
   ],\
@@ -19,7 +19,7 @@ const RAW_RUNTIME_STATE =
   "ignorePatternData": "(^(?:\\\\.yarn\\\\/sdks(?:\\\\/(?!\\\\.{1,2}(?:\\\\/|$))(?:(?:(?!(?:^|\\\\/)\\\\.{1,2}(?:\\\\/|$)).)*?)|$))$)",\
   "pnpZipBackend": "libzip",\
   "fallbackExclusionList": [\
-    ["personal work", ["workspace:."]]\
+    ["personal-work", ["workspace:."]]\
   ],\
   "fallbackPool": [\
   ],\
@@ -28,18 +28,49 @@ const RAW_RUNTIME_STATE =
       [null, {\
         "packageLocation": "./",\
         "packageDependencies": [\
-          ["personal work", "workspace:."]\
+          ["@playwright/test", "npm:1.65.0"],\
+          ["personal-work", "workspace:."]\
         ],\
         "linkType": "SOFT"\
       }]\
     ]],\
-    ["personal work", [\
+    ["@playwright/test", [\
+      ["npm:1.65.0", {\
+        "packageLocation": "../../../../.yarn/berry/cache/@playwright-test-npm-1.65.0-f72bb587f5-10c0.zip/node_modules/@playwright/test/",\
+        "packageDependencies": [\
+          ["@playwright/test", "npm:1.65.0"],\
+          ["playwright", "npm:1.65.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["personal-work", [\
       ["workspace:.", {\
         "packageLocation": "./",\
         "packageDependencies": [\
-          ["personal work", "workspace:."]\
+          ["@playwright/test", "npm:1.65.0"],\
+          ["personal-work", "workspace:."]\
         ],\
         "linkType": "SOFT"\
+      }]\
+    ]],\
+    ["playwright", [\
+      ["npm:1.65.0", {\
+        "packageLocation": "../../../../.yarn/berry/cache/playwright-npm-1.65.0-3da210035d-10c0.zip/node_modules/playwright/",\
+        "packageDependencies": [\
+          ["playwright", "npm:1.65.0"],\
+          ["playwright-core", "npm:1.65.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["playwright-core", [\
+      ["npm:1.65.0", {\
+        "packageLocation": "../../../../.yarn/berry/cache/playwright-core-npm-1.65.0-816b8868d1-10c0.zip/node_modules/playwright-core/",\
+        "packageDependencies": [\
+          ["playwright-core", "npm:1.65.0"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]]\
   ]\

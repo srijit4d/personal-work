@@ -1,4 +1,15 @@
 {
-  "name": "personal work",
-  "packageManager": "yarn@4.18.1"
+  "name": "personal-work",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "yarn@4.18.1",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0"
+  }
 }
