@@ -25,3 +25,10 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: seo-audit-artifacts
+        path: artifacts/seo/
+        if-no-files-found: warn
+        retention-days: 30

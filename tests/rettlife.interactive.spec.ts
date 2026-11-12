@@ -6,25 +6,40 @@ async function gotoHome(page: Page) {
   await page.goto(HOME_URL, { waitUntil: 'domcontentloaded' });
 }
 
-async function closeCountryDialogIfVisible(page: Page) {
-  const dialog = page.getByRole('dialog');
-  const visible = await dialog.isVisible().catch(() => false);
-  if (!visible) return;
+async function handleInitialDialogs(page: Page) {
+  const activeDialog = page.getByRole('dialog').first();
+  const hasDialog = await activeDialog.isVisible().catch(() => false);
 
-  await page.keyboard.press('Escape').catch(() => {});
+  if (hasDialog) {
+    const localeChoice = activeDialog
+      .getByRole('link', { name: /Visit|click|Klicken|haga|fare/i })
+      .first();
 
-  if (await dialog.isVisible().catch(() => false)) {
-    const closeButton = dialog.getByRole('button', { name: /close|dismiss|cancel/i });
-    if (await closeButton.first().isVisible().catch(() => false)) {
-      await closeButton.first().click({ force: true }).catch(() => {});
+    if (await localeChoice.isVisible().catch(() => false)) {
+      await localeChoice.click({ force: true }).catch(() => {});
+      await page.waitForLoadState('domcontentloaded').catch(() => {});
     }
   }
+
+  const dismissButtons = [
+    page.getByRole('button', { name: /Reject Optional Cookies/i }).first(),
+    page.getByRole('button', { name: /Dismiss|Close|Cancel/i }).first(),
+    page.getByRole('button', { name: /Accept Optional Cookies/i }).first(),
+  ];
+
+  for (const dismissButton of dismissButtons) {
+    if (await dismissButton.isVisible().catch(() => false)) {
+      await dismissButton.click({ force: true }).catch(() => {});
+    }
+  }
+
+  await page.keyboard.press('Escape').catch(() => {});
 }
 
 test.describe('RettLife interactive user flows', () => {
   test('can open homepage and interact with navigation links', async ({ page }) => {
     await gotoHome(page);
-    await closeCountryDialogIfVisible(page);
+    await handleInitialDialogs(page);
 
     await page
       .getByRole('navigation', { name: /Primary navigation/i })
@@ -37,7 +52,7 @@ test.describe('RettLife interactive user flows', () => {
 
   test('can open the search UI and submit a term', async ({ page }) => {
     await gotoHome(page);
-    await closeCountryDialogIfVisible(page);
+    await handleInitialDialogs(page);
 
     await page.getByRole('button', { name: 'Search' }).first().click({ force: true });
 

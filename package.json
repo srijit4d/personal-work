@@ -7,7 +7,9 @@
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "test:seo-routes": "playwright test tests/rettlife.seo-routes.spec.ts",
+    "test:seo-routes:sample": "SEO_MAX_ROUTES=10 playwright test tests/rettlife.seo-routes.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0"

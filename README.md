@@ -84,6 +84,14 @@ Run specific suites:
 ```zsh
 yarn playwright test tests/rettlife.spec.ts
 yarn playwright test tests/rettlife.interactive.spec.ts
+yarn playwright test tests/rettlife.seo-routes.spec.ts
+```
+
+Run route-level SEO audit helpers:
+
+```zsh
+yarn test:seo-routes
+yarn test:seo-routes:sample
 ```
 
 ## Reports
@@ -112,6 +120,29 @@ Note: `show-report` starts a local server. If you stop it with `Ctrl+C`, the ter
 	- Interactive nav click-through flow
 	- Search open + submit flow
 	- Modal-aware behavior handling for locale dialog
+
+- `tests/rettlife.seo-routes.spec.ts`
+	- Discovers routes from `https://rettlife.eu/sitemap.xml`
+	- Audits each route for:
+		- non-empty `<title>` (basic quality threshold)
+		- non-empty meta description (basic quality threshold)
+		- JSON-LD schema with `schema.org` context and a valid `@type`
+	- Fails with a grouped report listing routes and missing SEO elements
+	- Writes machine-readable artifacts to:
+		- `artifacts/seo/seo-audit.json`
+		- `artifacts/seo/seo-audit.csv`
+
+### Optional: limit SEO audit size
+
+For faster local feedback, cap route count with `SEO_MAX_ROUTES`:
+
+```zsh
+SEO_MAX_ROUTES=25 yarn test:seo-routes
+```
+
+### CI artifact tip
+
+Upload `artifacts/seo/seo-audit.json` and `artifacts/seo/seo-audit.csv` as CI artifacts so SEO results can be trended over time.
 
 ## Useful notes
 

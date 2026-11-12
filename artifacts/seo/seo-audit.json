@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-11-12T06:33:49.340Z",
+  "baseUrl": "https://rettlife.eu",
+  "sitemapUrl": "https://rettlife.eu/sitemap.xml",
+  "routeCount": 10,
+  "failedRouteCount": 0,
+  "routes": [
+    {
+      "route": "https://rettlife.eu/",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/about-us",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/navigating-life-with-rett",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/rett-resources",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/rett-resources/caregivers",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/rett-resources/circle-care",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/rett-resources/community",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/rett-resources/medical",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/rett-resources/rett-video",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/rett-stories",
+      "passed": true,
+      "issues": []
+    }
+  ]
+}
