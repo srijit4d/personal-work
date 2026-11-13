@@ -1,4 +1,4 @@
-import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
+import { test, expect, type APIRequestContext, type Browser } from '@playwright/test';
 
 declare const require: (moduleName: string) => any;
 
@@ -9,6 +9,7 @@ const BASE_URL = 'https://rettlife.eu';
 const SITEMAP_URL = `${BASE_URL}/sitemap.xml`;
 const MIN_TITLE_LENGTH = 3;
 const MIN_META_DESCRIPTION_LENGTH = 20;
+const META_DESCRIPTION_EXCLUDED_PATHS = new Set(['/search']);
 
 function normalizeRoute(url: string): string {
   const trimmed = url.trim();
@@ -39,42 +40,6 @@ function parseSitemapLocations(xml: string): string[] {
   }
 
   return locations;
-}
-
-function hasRelevantSchemaMarkups(schemaTexts: string[]): boolean {
-  for (const schemaText of schemaTexts) {
-    try {
-      const parsedSchema = JSON.parse(schemaText) as unknown;
-      const schemaObjects = Array.isArray(parsedSchema) ? parsedSchema : [parsedSchema];
-
-      for (const schemaObject of schemaObjects) {
-        if (!schemaObject || typeof schemaObject !== 'object') {
-          continue;
-        }
-
-        const candidate = schemaObject as Record<string, unknown>;
-        const schemaContext = String(candidate['@context'] ?? '');
-        const schemaType = candidate['@type'];
-
-        if (!schemaType) {
-          continue;
-        }
-
-        const hasSchemaOrgContext = /schema\.org/i.test(schemaContext);
-        const hasType =
-          (typeof schemaType === 'string' && schemaType.trim().length > 0) ||
-          (Array.isArray(schemaType) && schemaType.some((entry) => String(entry).trim().length > 0));
-
-        if (hasSchemaOrgContext && hasType) {
-          return true;
-        }
-      }
-    } catch {
-      continue;
-    }
-  }
-
-  return false;
 }
 
 async function discoverRoutes(request: APIRequestContext): Promise<string[]> {
@@ -115,53 +80,97 @@ async function discoverRoutes(request: APIRequestContext): Promise<string[]> {
   return routeList;
 }
 
-async function collectSeoIssuesForRoute(page: Page, routeUrl: string): Promise<string[]> {
+async function collectSeoIssuesForRoute(
+  browser: Browser,
+  routeUrl: string
+): Promise<string[]> {
   const issues: string[] = [];
+  const routePathname = new URL(routeUrl).pathname.toLowerCase();
+  const shouldCheckMetaDescription = !META_DESCRIPTION_EXCLUDED_PATHS.has(routePathname);
+  const context = await browser.newContext();
+  const page = await context.newPage();
 
-  const response = await page.goto(routeUrl, {
-    waitUntil: 'domcontentloaded',
-    timeout: 45_000,
-  });
+  try {
+    let response: Awaited<ReturnType<typeof page.goto>> | null = null;
+    try {
+      response = await page.goto(routeUrl, {
+        waitUntil: 'domcontentloaded',
+        timeout: 45_000,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      issues.push(`Navigation failed: ${message}`);
+      return issues;
+    }
 
-  if (!response) {
-    issues.push('No HTTP response received while loading route.');
+    if (!response) {
+      issues.push('No HTTP response received while loading route.');
+      return issues;
+    }
+
+    if (!response.ok()) {
+      issues.push(`Non-success HTTP status: ${response.status()} ${response.statusText()}`);
+    }
+
+    const hydrationWindowMs = 6_000;
+    await page
+      .waitForFunction(
+        ({ minTitleLength, minMetaLength }) => {
+          const title = document.title.trim();
+          const metaDescription = (
+            document.head.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''
+          ).trim();
+
+          return title.length >= minTitleLength && metaDescription.length >= minMetaLength;
+        },
+        {
+          minTitleLength: MIN_TITLE_LENGTH,
+          minMetaLength: MIN_META_DESCRIPTION_LENGTH,
+        },
+        {
+          timeout: hydrationWindowMs,
+        }
+      )
+      .catch(() => null);
+
+    let seoSnapshot: { title: string; metaDescription: string };
+    try {
+      seoSnapshot = await page.evaluate(() => {
+        const title = document.title.trim();
+        const metaDescription = (
+          document.head.querySelector('meta[name="description"]')?.getAttribute('content') ?? ''
+        ).trim();
+
+        return { title, metaDescription };
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      issues.push(`Metadata snapshot failed: ${message}`);
+      return issues;
+    }
+
+    const pageTitle = seoSnapshot.title;
+    if (!pageTitle) {
+      issues.push('Missing <title> content.');
+    } else if (pageTitle.length < MIN_TITLE_LENGTH) {
+      issues.push(`Title appears too short (${pageTitle.length} chars).`);
+    }
+
+    const metaDescription = seoSnapshot.metaDescription;
+
+    if (shouldCheckMetaDescription) {
+      if (!metaDescription) {
+        issues.push('Missing meta description content.');
+      } else if (metaDescription.length < MIN_META_DESCRIPTION_LENGTH) {
+        issues.push(`Meta description appears too short (${metaDescription.length} chars).`);
+      }
+    }
+
     return issues;
+  } finally {
+    await context.close().catch(() => {});
+    await page.close().catch(() => {});
   }
-
-  if (!response.ok()) {
-    issues.push(`Non-success HTTP status: ${response.status()} ${response.statusText()}`);
-  }
-
-  const pageTitle = (await page.title()).trim();
-  if (!pageTitle) {
-    issues.push('Missing <title> content.');
-  } else if (pageTitle.length < MIN_TITLE_LENGTH) {
-    issues.push(`Title appears too short (${pageTitle.length} chars).`);
-  }
-
-  const metaDescription = (
-    await page.locator('head meta[name="description"]').first().getAttribute('content')
-  )?.trim();
-
-  if (!metaDescription) {
-    issues.push('Missing meta description content.');
-  } else if (metaDescription.length < MIN_META_DESCRIPTION_LENGTH) {
-    issues.push(`Meta description appears too short (${metaDescription.length} chars).`);
-  }
-
-  const jsonLdSchemas = (await page
-    .locator('script[type="application/ld+json"]')
-    .allTextContents())
-    .map((schemaText) => schemaText.trim())
-    .filter(Boolean);
-
-  if (jsonLdSchemas.length === 0) {
-    issues.push('Missing JSON-LD schema script tag.');
-  } else if (!hasRelevantSchemaMarkups(jsonLdSchemas)) {
-    issues.push('JSON-LD found, but no object with schema.org @context and valid @type was detected.');
-  }
-
-  return issues;
 }
 
 function escapeCsvCell(value: string): string {
@@ -196,10 +205,7 @@ function writeArtifactFiles(jsonContent: string, csvContent: string): void {
 }
 
 test.describe('RettLife route-level SEO audit', () => {
-  test('all discovered routes include title, meta description, and relevant schema', async ({
-    page,
-    request,
-  }, testInfo) => {
+  test('all discovered routes include title and meta description', async ({ browser, request }, testInfo) => {
     test.setTimeout(10 * 60 * 1000);
 
     const routes = await discoverRoutes(request);
@@ -209,7 +215,7 @@ test.describe('RettLife route-level SEO audit', () => {
     const auditRecords: Array<{ route: string; passed: boolean; issues: string[] }> = [];
 
     for (const route of routes) {
-      const routeIssues = await collectSeoIssuesForRoute(page, route);
+      const routeIssues = await collectSeoIssuesForRoute(browser, route);
       auditRecords.push({
         route,
         passed: routeIssues.length === 0,

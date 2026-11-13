@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-12T06:33:49.340Z",
+  "generatedAt": "2026-11-13T10:44:17.905Z",
   "baseUrl": "https://rettlife.eu",
   "sitemapUrl": "https://rettlife.eu/sitemap.xml",
-  "routeCount": 10,
+  "routeCount": 16,
   "failedRouteCount": 0,
   "routes": [
     {
@@ -52,6 +52,36 @@
     },
     {
       "route": "https://rettlife.eu/rett-stories",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/rett-stories/bonny",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/rett-stories/ema",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/rett-stories/erika",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/rettLife-newsletter",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/search",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "route": "https://rettlife.eu/what-is-rett-syndrome",
       "passed": true,
       "issues": []
     }

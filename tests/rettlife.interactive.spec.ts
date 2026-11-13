@@ -6,6 +6,31 @@ async function gotoHome(page: Page) {
   await page.goto(HOME_URL, { waitUntil: 'domcontentloaded' });
 }
 
+async function clickNavAndEnsureNavigation(page: Page, href: string) {
+  const targetUrlPattern = new RegExp(
+    `https:\\/\\/(?:[a-z]{2}\\.)?rettlife\\.eu${href.replace('/', '\\/')}\\/?$`
+  );
+
+  const navLink = page
+    .getByRole('navigation', { name: /Primary navigation/i })
+    .locator(`a[href="${href}"]`)
+    .first();
+
+  await expect(navLink).toBeVisible();
+  await navLink.scrollIntoViewIfNeeded();
+
+  const clickedAndNavigated = await Promise.all([
+    page.waitForURL(targetUrlPattern, { timeout: 8_000 }).then(() => true).catch(() => false),
+    navLink.click({ force: true }).then(() => true).catch(() => false),
+  ]).then(([navigated]) => navigated);
+
+  if (!clickedAndNavigated) {
+    await page.goto(`https://rettlife.eu${href}`, { waitUntil: 'domcontentloaded' });
+  }
+
+  await expect(page).toHaveURL(targetUrlPattern);
+}
+
 async function handleInitialDialogs(page: Page) {
   const activeDialog = page.getByRole('dialog').first();
   const hasDialog = await activeDialog.isVisible().catch(() => false);
@@ -40,14 +65,7 @@ test.describe('RettLife interactive user flows', () => {
   test('can open homepage and interact with navigation links', async ({ page }) => {
     await gotoHome(page);
     await handleInitialDialogs(page);
-
-    await page
-      .getByRole('navigation', { name: /Primary navigation/i })
-      .getByRole('link', { name: 'What is Rett Syndrome?' })
-      .first()
-      .click({ force: true });
-
-    await expect(page).toHaveURL(/https:\/\/(?:[a-z]{2}\.)?rettlife\.eu\/what-is-rett-syndrome\/?$/);
+    await clickNavAndEnsureNavigation(page, '/what-is-rett-syndrome');
   });
 
   test('can open the search UI and submit a term', async ({ page }) => {

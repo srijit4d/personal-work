@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const enableFirefox = process.env.PW_ENABLE_FIREFOX === '1';
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -37,6 +39,20 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+
+    ...(enableFirefox
+      ? [
+          {
+            name: 'firefox',
+            use: { ...devices['Desktop Firefox'] },
+          },
+        ]
+      : []),
+
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
     },
 
     /* Test against mobile viewports. */

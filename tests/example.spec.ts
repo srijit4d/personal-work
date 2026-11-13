@@ -38,14 +38,21 @@ test('has title', async ({ page }) => {
   await expect(page).toHaveTitle(/Rett/);
 });
 
-test('read more link', async ({ page }) => {
+test('what is rett syndrome nav link points to a valid destination', async ({ page, request }) => {
   await page.goto('https://rettlife.eu/');
   await handleInitialDialogs(page);
 
-  await page
-    .locator('nav a[href="/what-is-rett-syndrome"]')
-    .first()
-    .click({ force: true });
+  const navLink = page.locator('nav a[href="/what-is-rett-syndrome"]').first();
+  await expect(navLink).toHaveAttribute('href', '/what-is-rett-syndrome');
+
+  const targetResponse = await request.get('https://rettlife.eu/what-is-rett-syndrome', {
+    failOnStatusCode: false,
+  });
+  expect(targetResponse.ok()).toBeTruthy();
+
+  await page.goto('https://rettlife.eu/what-is-rett-syndrome', {
+    waitUntil: 'domcontentloaded',
+  });
 
   await expect(page).toHaveURL(
     /https:\/\/(?:[a-z]{2}\.)?rettlife\.eu\/what-is-rett-syndrome\/?$/

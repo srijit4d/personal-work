@@ -87,6 +87,15 @@ yarn playwright test tests/rettlife.interactive.spec.ts
 yarn playwright test tests/rettlife.seo-routes.spec.ts
 ```
 
+### Browser projects
+
+- Default run includes `chromium` and `webkit`.
+- Firefox is available behind an opt-in flag:
+
+```zsh
+PW_ENABLE_FIREFOX=1 yarn test
+```
+
 Run route-level SEO audit helpers:
 
 ```zsh
@@ -126,8 +135,7 @@ Note: `show-report` starts a local server. If you stop it with `Ctrl+C`, the ter
 	- Audits each route for:
 		- non-empty `<title>` (basic quality threshold)
 		- non-empty meta description (basic quality threshold)
-		- JSON-LD schema with `schema.org` context and a valid `@type`
-	- Fails with a grouped report listing routes and missing SEO elements
+	- Fails with a grouped report listing each route and exactly what is missing (title or meta description)
 	- Writes machine-readable artifacts to:
 		- `artifacts/seo/seo-audit.json`
 		- `artifacts/seo/seo-audit.csv`

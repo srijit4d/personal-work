@@ -12,6 +12,7 @@
     "test:seo-routes:sample": "SEO_MAX_ROUTES=10 playwright test tests/rettlife.seo-routes.spec.ts"
   },
   "devDependencies": {
-    "@playwright/test": "^1.65.0"
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^26.6.6"
   }
 }

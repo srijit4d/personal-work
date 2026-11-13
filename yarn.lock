@@ -16,11 +16,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^26.6.6":
+  version: 26.6.6
+  resolution: "@types/node@npm:26.6.6"
+  dependencies:
+    undici-types: "npm:~8.9.0"
+  checksum: 10c0/5cb63f644f6e85a257a9cd2403cbcbe196760e2a35fd3ec9fb8b5cff663e14cc832b198cc17b53f870a2e30900ed45a1fb3f53e6589aba26b8e8c484aa672053
+  languageName: node
+  linkType: hard
+
 "personal-work@workspace:.":
   version: 0.0.0-use.local
   resolution: "personal-work@workspace:."
   dependencies:
     "@playwright/test": "npm:^1.65.0"
+    "@types/node": "npm:^26.6.6"
   languageName: unknown
   linkType: soft
 
@@ -41,5 +51,12 @@ __metadata:
   bin:
     playwright: cli.js
   checksum: 10c0/a7d71f3ca5bcad0531b5f3c39ae1a9be0da8e74be6fee8510d99b9f5fc07fd5b3d889aa4ca487c70ca29aba8625f74e3c2c7473b4c8a784dc14fefff80474ac3
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~8.9.0":
+  version: 8.9.0
+  resolution: "undici-types@npm:8.9.0"
+  checksum: 10c0/51c712c20c087368f62c6fc0f2bc49fa76bfe5dec28ff01584bb677ff29b0622569783c02d43e151143808c48c0503f804093bd2c491b10f2a830138034cb451
   languageName: node
   linkType: hard
